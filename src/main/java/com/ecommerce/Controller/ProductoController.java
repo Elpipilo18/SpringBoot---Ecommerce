@@ -10,7 +10,12 @@ public class ProductoController {
 	
 	@GetMapping("")
 	public String show() {
-		return "productos/show.html";
+		return "productos/show";
+	}
+	
+	@GetMapping("crear")
+	public String create() {
+		return "productos/create";
 	}
 	
 }
