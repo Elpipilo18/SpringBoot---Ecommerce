@@ -1,10 +1,13 @@
 package com.ecommerce.Controller;
 
+import java.util.Optional;
+
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -42,6 +45,22 @@ public class ProductoController {
 		Usuario user = new Usuario(2,"","","","","","","");
 		producto.setUsuario(user);
 		productoService.save(producto);
+		return "redirect:/productos";
+	}
+	
+	@GetMapping("editar/{id}")
+	public String edit(@PathVariable Integer id, ModelMap model) {
+		Producto producto = new Producto();
+		Optional<Producto> optionalProducto = productoService.get(id);
+		producto = optionalProducto.get();
+		LOGGER.info("Producto Buscado : {}",producto);
+		model.addAttribute("producto",producto);
+		
+		return "productos/edit";
+	}
+	@PostMapping("actualizar")
+	public String update(Producto producto) {
+		productoService.update(producto);
 		return "redirect:/productos";
 	}
 }
