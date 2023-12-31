@@ -1,5 +1,6 @@
 package com.ecommerce.Controller;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import org.slf4j.*;
@@ -10,10 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ecommerce.Model.Producto;
 import com.ecommerce.Model.Usuario;
 import com.ecommerce.Service.ProductoService;
+import com.ecommerce.Service.UploadFileService;
 
 import ch.qos.logback.classic.Logger;
 
@@ -28,6 +32,9 @@ public class ProductoController {
 	@Autowired
 	private ProductoService productoService;
 	
+	@Autowired
+	private UploadFileService uploadFileService;
+	
 	@GetMapping("")
 	public String show(ModelMap model) {
 		model.addAttribute("productos",productoService.findAll());
@@ -40,10 +47,26 @@ public class ProductoController {
 	}
 	
 	@PostMapping("guardar")
-	public String save(Producto producto) {
+	public String save(Producto producto,@RequestParam("img") MultipartFile file) throws IOException {
 		LOGGER.info("este es el objeto producto {}",producto);
 		Usuario user = new Usuario(2,"","","","","","","");
 		producto.setUsuario(user);
+		
+		//imagen
+		if(producto.getId() == null) { //cuando se crea un producto
+			String nombreImagen = uploadFileService.saveImage(file);
+			producto.setImagen(nombreImagen);
+		}else{
+			if(file.isEmpty()) {//cuando editamos el producto pero no cambiamos la imagen
+				Producto p = new Producto();
+				p = productoService.get(producto.getId()).get();
+				producto.setImagen(p.getImagen());
+			}else{
+				String nombreImagen = uploadFileService.saveImage(file);
+				producto.setImagen(nombreImagen);
+			}
+		}
+		
 		productoService.save(producto);
 		return "redirect:/productos";
 	}
@@ -63,6 +86,7 @@ public class ProductoController {
 		productoService.update(producto);
 		return "redirect:/productos";
 	}
+	
 	@GetMapping("eliminar/{id}")
 	public String delete(@PathVariable Integer id) {
 		productoService.delete(id);
