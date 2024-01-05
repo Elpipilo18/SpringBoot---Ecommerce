@@ -59,7 +59,7 @@
                   <td th:text = "${detalles.precio}"></td>
                   <td th:text = "${detalles.cantidad}"></td>
                   <td th:text = "${detalles.total}"></td>
-                  <td><a href="#" class="btn btn-danger">Quitar</a></td>
+                  <td><a th:href="@{borrar/carrito/{id} (id = ${detalles.producto.id})}" class="btn btn-danger">Quitar</a></td>
                 </tr>
               </tbody>
             </table>
